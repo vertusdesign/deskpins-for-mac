@@ -21,6 +21,7 @@ Keep any window above the others. A menu-bar utility for macOS, inspired by
 > downloaded and so nothing is quarantined.
 
 - Pin the frontmost window with a global shortcut (⌃⌥⌘P by default) or from the menu
+- One pinned window per desktop; each desktop keeps its own
 - Unpin by clicking the green pin badge on the window, or from the menu
 - Configurable shortcut, which can also be switched off entirely
 - Optional launch at login
@@ -83,11 +84,29 @@ over the original. Clicking it brings the real window forward.
 The full reasoning, including the two approaches that were tried and rejected, is in
 [specs/01-platform-constraints.md](specs/01-platform-constraints.md).
 
+## One pinned window per desktop
+
+Pinning a window releases any pin already on the same desktop. Different desktops are
+independent and keep a pin each.
+
+This is a deliberate product limit rather than an unfinished feature. Two pinned windows on
+one desktop cannot both behave correctly. Each is drawn by a panel this app owns, floating
+above ordinary windows, and selecting one of them cannot lift its real window above the
+other's panel — macOS has no public API for that. Both arrangements were built and both
+failed: with every mirror on one level, the window being used was buried under the other pin;
+with the active pin's mirror raised and made click-through, it hid the other pinned window,
+and clicks passing through it landed in the mirror below, so the two swapped places on every
+click and neither window could be used.
+
+A Space has no public identity API, and none is needed here: `optionOnScreenOnly` lists only
+the windows of the desktop in view, so pins living elsewhere are simply not in that list and
+are left alone.
+
 ## Known limitations
 
-- **The 0.9.0-alpha disk image is Intel-only (x86_64).** It was built on an Intel Mac
-  without full Xcode, which is required to link a universal binary. On Apple silicon it runs
-  under Rosetta 2. A universal build is planned for the next release.
+- **One window can be pinned per desktop.** Pinning another releases the previous one on
+  that desktop; different desktops keep their own pin. This is a deliberate limit — see
+  [One pinned window per desktop](#one-pinned-window-per-desktop).
 
 - The floating copy is an image, not the window. Interacting with a pinned window that is
   not active takes one click to bring it forward first.

@@ -27,6 +27,10 @@ First public release.
   granted permissions survive rebuilds and dylib injection is blocked.
 
 ### Fixed before release
+- Documentation drift caught in review: the behaviour spec still mandated the click-through
+  active mirror that B-9.1 forbids, the README still advertised an Intel-only image and did
+  not mention the one-pin-per-desktop limit at all, and the release notes claimed both
+  universal and Intel-only in the same page.
 - The app ships as a universal binary and runs natively on Apple silicon. Earlier images
   carried an Intel-only build, which needed Rosetta on an M-series Mac. Each slice is built
   with an explicit target triple and merged with `lipo`, so no full Xcode is required.

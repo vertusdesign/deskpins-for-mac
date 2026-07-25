@@ -25,7 +25,6 @@ Each pin has a placement, recomputed by `PinManager` on every event in A-5:
 - `onCurrentSpace` — the window's `CGWindowID` is in the on-screen list (C-6)
 - `isActive` — the window's application is frontmost **and** the application's
   `AXFocusedWindow` is this window
-- `hasCompany` — at least one other pin is on the current Space
 
 **B-5** A pin whose window is **not on the current Space** MUST hide both its mirror and its
 badge. **[constraint]** Otherwise `canJoinAllSpaces` leaves them floating over an unrelated
@@ -75,17 +74,17 @@ merely hide the panel.
 
 | Element | Level |
 |---|---|
-| Resting mirror | `.floating` (3) |
-| Active pin's mirror | `.floating + 1` (4) |
+| Mirror | `.floating` (3) |
 | Pin badge | `.floating + 2` (5) |
 
-**B-13** The mirror of the **active** pin sits above the other mirrors, so selecting a
-pinned window brings it above the other pinned windows rather than below them.
+**B-13** Every mirror uses the same level. There is at most one pin per Space (B-9.1), so
+mirrors never compete with each other on screen, and an active pin shows no mirror at all
+(B-9).
 
-**B-14** The active pin's mirror MUST be click-through (`ignoresMouseEvents = true`). It
-holds its place in the stack while every click, scroll and drag reaches the real window
-directly beneath it. Non-active mirrors MUST NOT be click-through — clicking one is how the
-user selects that window.
+**B-14** Mirrors MUST NOT be click-through. Clicking a mirror is how the user selects that
+window, and a click-through mirror would send the click to whatever happens to lie beneath
+it instead. **[constraint]** An earlier design made the active pin's mirror click-through so
+it could hold a higher level; see B-9.1 for why that MUST NOT be reintroduced.
 
 **B-15** The badge MUST NOT use `.screenSaver` or any level above the mirrors. An ordinary
 application has no business drawing over system UI or the screen saver.
