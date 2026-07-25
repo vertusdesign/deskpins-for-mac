@@ -26,9 +26,15 @@ if ! swift build -c release --scratch-path "$SCRATCH" "${ARCH_FLAGS[@]}" 2>/dev/
     swift build -c release --scratch-path "$SCRATCH"
 fi
 
-BIN_DIR="$(swift build -c release --scratch-path "$SCRATCH" ${ARCH_FLAGS[@]+"${ARCH_FLAGS[@]}"} --show-bin-path)"
+BIN_DIR="$(swift build -c release --scratch-path "$SCRATCH" ${ARCH_FLAGS[@]+"${ARCH_FLAGS[@]}"} --show-bin-path 2>/dev/null || true)"
 BINARY="$BIN_DIR/DeskPins"
-test -x "$BINARY" || { echo "Build produced no binary at $BINARY" >&2; exit 1; }
+
+# A universal build goes through xcbuild, whose product layout `--show-bin-path` does not
+# report — it fails outright there. Fall back to locating the executable in the scratch tree.
+if [ ! -x "$BINARY" ]; then
+    BINARY="$(find "$SCRATCH" -type f -perm -111 -name DeskPins -path '*Release*' 2>/dev/null | head -1)"
+fi
+test -x "${BINARY:-}" || { echo "Build produced no binary under $SCRATCH" >&2; exit 1; }
 
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"

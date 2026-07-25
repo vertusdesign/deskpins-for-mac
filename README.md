@@ -60,6 +60,10 @@ The full reasoning, including the two approaches that were tried and rejected, i
 
 ## Known limitations
 
+- **The 0.9.0-alpha disk image is Intel-only (x86_64).** It was built on an Intel Mac
+  without full Xcode, which is required to link a universal binary. On Apple silicon it runs
+  under Rosetta 2. A universal build is planned for the next release.
+
 - The floating copy is an image, not the window. Interacting with a pinned window that is
   not active takes one click to bring it forward first.
 - macOS marks captured windows with its own "being captured" indicator. That indicator is
