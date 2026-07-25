@@ -1,0 +1,37 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show toolchain
+        run: swift --version
+
+      - name: Build (release, warnings must be clean)
+        run: swift build -c release 2>&1 | tee build.log
+
+      - name: Fail on warnings
+        run: |
+          if grep -q "warning:" build.log; then
+            echo "Build produced warnings:"
+            grep "warning:" build.log
+            exit 1
+          fi
+
+      - name: Assemble bundle
+        run: ./Scripts/build-app.sh
+
+      # No certificate on CI, so the bundle is ad-hoc signed here. That is fine for a build
+      # check: it proves the app assembles. Release builds are made locally per specs/06.
+      - name: Check bundle layout
+        run: |
+          test -x build/DeskPins.app/Contents/MacOS/DeskPins
+          test -f build/DeskPins.app/Contents/Resources/AppIcon.icns
+          /usr/libexec/PlistBuddy -c 'Print CFBundleIdentifier' build/DeskPins.app/Contents/Info.plist
