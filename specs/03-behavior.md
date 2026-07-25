@@ -47,15 +47,21 @@ above its siblings. Detected via `kAXFocusedWindowChangedNotification` observed 
 **B-9** Not shown when the pin is active — the user is working in that window, so the real
 one is what should receive input, and no capture is started at all.
 
-**B-9.1** All mirrors MUST share one window level, and the active pin's mirror MUST NOT be
-raised above the others and made click-through. That was tried and MUST NOT be reintroduced:
-the raised mirror covers the other pinned windows, which is the opposite of pinning them, and
-a click passing through it lands in the next mirror down, activating that pin — the two then
-swap levels on every click and neither window can be used.
+**B-9.1** At most one window MAY be pinned per Space. Pinning a window while another pin
+already exists on the same Space MUST release that one first.
 
-The consequence is accepted deliberately: the window being worked in sits below the other
-pinned windows. That is what pinning those windows means, and no public API can lift another
-application's real window above a panel we own.
+This is a deliberate product limit, not an oversight. Two pinned windows on one desktop
+cannot both behave correctly: each is drawn by a panel the app owns, floating above ordinary
+windows, and selecting one of them cannot lift its real window above the other's panel —
+macOS offers no public API for that. Both arrangements were built and both failed. Keeping
+all mirrors on one level buries the window being used underneath the other pin. Raising the
+active pin's mirror and making it click-through hides the other pinned window behind the one
+in use, and clicks passing through land in the mirror below, activating that pin, so the two
+swap places on every click and neither window can be used. Neither MAY be reintroduced.
+
+**B-9.2** Spaces stay independent — a pin on another desktop MUST NOT be released. No public
+API exposes a Space's identity and none is needed: `optionOnScreenOnly` lists only the
+windows of the Space in view, so pins on other desktops are not among them.
 
 **B-10** Not shown while its window is being dragged: a captured copy lags behind the window
 it mirrors, which reads as smearing.

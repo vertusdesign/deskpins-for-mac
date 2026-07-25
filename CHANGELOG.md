@@ -27,6 +27,11 @@ First public release.
   granted permissions survive rebuilds and dylib injection is blocked.
 
 ### Fixed before release
+- Pinning is limited to one window per desktop; pinning another releases the previous one on
+  that desktop. Two pinned windows on one desktop cannot both behave correctly — selecting
+  one either buried it under the other or made clicks bounce between them — and no public API
+  can lift one application's real window above a panel another application owns. Different
+  desktops keep their own pin.
 - With two or more windows pinned, clicking one did not give it back: its mirror was raised
   above the other pins and made click-through, so clicks fell through into the next mirror
   down, activated that pin instead, and the two swapped places on every click. All mirrors

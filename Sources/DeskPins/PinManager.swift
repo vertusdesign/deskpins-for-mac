@@ -42,6 +42,7 @@ final class PinManager {
         if let existing = pins.first(where: { $0.windowID == target.windowID }) {
             return .pinned(existing.name)
         }
+        replaceExistingPinOnThisSpace()
         guard let pin = Pin(target: target) else { return .failed }
         pin.onRemove = { [weak self] pin, reveal in self?.remove(pin, reveal: reveal) }
         pin.onFocusChanged = { [weak self] in self?.scheduleUpdate(allowRaise: false) }
@@ -54,6 +55,23 @@ final class PinManager {
         onChange?()
         updateMirrors()
         return .pinned(target.name)
+    }
+
+    /// One pinned window per desktop: pinning a second one on the same Space releases the
+    /// first.
+    ///
+    /// Two pinned windows on one desktop cannot both behave correctly. Each is drawn by a
+    /// panel we own, floating above ordinary windows, and selecting one of them cannot lift
+    /// its real window above the other's panel — macOS has no public API for that. Every
+    /// arrangement tried either buried the window being used or made clicks bounce between
+    /// the two. One pin per desktop removes the conflict instead of hiding it.
+    ///
+    /// Desktops stay independent. There is no public API for a Space's identity, but none is
+    /// needed: `optionOnScreenOnly` lists only the windows of the Space in view, so pins
+    /// living on other desktops are simply not among them and are left alone.
+    private func replaceExistingPinOnThisSpace() {
+        let onScreen = WindowFinder.onScreenWindowIDs()
+        pins.filter { onScreen.contains($0.windowID) }.forEach { remove($0) }
     }
 
     /// Pins the window, or unpins it when it is pinned already.
