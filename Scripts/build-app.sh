@@ -31,13 +31,20 @@ fi
 # `--show-bin-path` reports the SwiftPM layout, which only exists for a host-only build; a
 # universal build goes through xcbuild and puts the merged binary elsewhere. Ask only when
 # the answer is meaningful, and fall back to searching the scratch tree either way.
-BINARY=""
-if [ "$UNIVERSAL" = no ]; then
-    BIN_DIR="$(swift build -c release --scratch-path "$SCRATCH" --show-bin-path)"
-    BINARY="$BIN_DIR/DeskPins"
+if [ "$UNIVERSAL" = yes ]; then
+    BINARY="$SCRATCH/apple/Products/Release/DeskPins"
+else
+    BINARY="$(swift build -c release --scratch-path "$SCRATCH" --show-bin-path)/DeskPins"
 fi
-if [ ! -x "$BINARY" ]; then
-    BINARY="$(find "$SCRATCH" -type f -perm -111 -name DeskPins -path '*Release*' -print 2>/dev/null | head -1 || true)"
+
+# Last resort. The scratch tree also holds intermediates named DeskPins that are executable
+# but are not Mach-O images, so candidates are filtered by asking lipo to read them.
+if [ ! -x "$BINARY" ] || ! lipo -archs "$BINARY" >/dev/null 2>&1; then
+    BINARY=""
+    while IFS= read -r candidate; do
+        if lipo -archs "$candidate" >/dev/null 2>&1; then BINARY="$candidate"; break; fi
+    done < <(find "$SCRATCH" -type f -perm -111 -name DeskPins \
+                  -not -path '*Intermediates*' -print 2>/dev/null)
 fi
 echo "==> binary: ${BINARY:-<none found>}"
 test -x "${BINARY:-}" || { echo "Build produced no binary under $SCRATCH" >&2; exit 1; }
