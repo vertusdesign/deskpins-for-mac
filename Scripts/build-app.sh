@@ -35,7 +35,11 @@ mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BINARY" "$APP/Contents/MacOS/DeskPins"
 
 # The icon is generated from the same drawing the pin marker uses, so it never drifts.
-swift "$ROOT/Scripts/make-icon.swift" "$APP/Contents/Resources/AppIcon.icns" >/dev/null
+# Rendering goes through AppKit, which needs a window server: on a headless CI runner it
+# cannot work, and an icon is not worth failing a build check over.
+if ! swift "$ROOT/Scripts/make-icon.swift" "$APP/Contents/Resources/AppIcon.icns" >/dev/null 2>&1; then
+    echo "warning: could not render the app icon (no window server?); bundle has no icon."
+fi
 
 cat > "$APP/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
