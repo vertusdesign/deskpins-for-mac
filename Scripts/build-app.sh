@@ -17,37 +17,51 @@ SCRATCH="${DESKPINS_SCRATCH:-$HOME/Library/Caches/DeskPins-build}"
 cd "$ROOT"
 mkdir -p "$SCRATCH"
 
-# Universal binary when the toolchain can cross-compile, otherwise host-only.
-# `${arr[@]+...}` keeps bash 3.2 (the system bash) from tripping over an empty array under `set -u`.
-UNIVERSAL=yes
-if swift build -c release --scratch-path "$SCRATCH" --arch arm64 --arch x86_64; then
-    echo "==> universal build succeeded"
-else
-    echo "==> universal build unavailable, building for the host architecture only"
-    UNIVERSAL=no
-    swift build -c release --scratch-path "$SCRATCH"
+# Universal binary, built one architecture at a time and merged with lipo.
+#
+# `swift build --arch arm64 --arch x86_64` is the obvious route but goes through xcbuild,
+# which ships only with full Xcode — on a machine with just the Command Line Tools it fails.
+# Explicit target triples need no xcbuild, so both slices build anywhere, and the app runs
+# natively on Apple silicon instead of through Rosetta.
+DEPLOYMENT="13.0"
+SLICES=()
+
+for ARCH in arm64 x86_64; do
+    TRIPLE="$ARCH-apple-macosx$DEPLOYMENT"
+    ARCH_SCRATCH="$SCRATCH-$ARCH"
+    mkdir -p "$ARCH_SCRATCH"
+    echo "==> building $ARCH"
+    if swift build -c release --triple "$TRIPLE" --scratch-path "$ARCH_SCRATCH"; then
+        SLICE="$ARCH_SCRATCH/$TRIPLE/release/DeskPins"
+        # Layouts differ between toolchains; fall back to searching for the Mach-O image.
+        if [ ! -x "$SLICE" ] || ! lipo -archs "$SLICE" >/dev/null 2>&1; then
+            SLICE=""
+            while IFS= read -r candidate; do
+                if lipo -archs "$candidate" 2>/dev/null | grep -qw "$ARCH"; then
+                    SLICE="$candidate"; break
+                fi
+            done < <(find "$ARCH_SCRATCH" -type f -perm -111 -name DeskPins \
+                          -not -path '*Intermediates*' -print 2>/dev/null)
+        fi
+        [ -n "$SLICE" ] && SLICES+=("$SLICE")
+    else
+        echo "warning: could not build for $ARCH"
+    fi
+done
+
+if [ "${#SLICES[@]}" -eq 0 ]; then
+    echo "Build produced no binary" >&2
+    exit 1
 fi
 
-# `--show-bin-path` reports the SwiftPM layout, which only exists for a host-only build; a
-# universal build goes through xcbuild and puts the merged binary elsewhere. Ask only when
-# the answer is meaningful, and fall back to searching the scratch tree either way.
-if [ "$UNIVERSAL" = yes ]; then
-    BINARY="$SCRATCH/apple/Products/Release/DeskPins"
-else
-    BINARY="$(swift build -c release --scratch-path "$SCRATCH" --show-bin-path)/DeskPins"
-fi
+BINARY="$SCRATCH/DeskPins-universal"
+mkdir -p "$SCRATCH"
+lipo -create "${SLICES[@]}" -output "$BINARY"
+echo "==> binary: $BINARY ($(lipo -archs "$BINARY"))"
 
-# Last resort. The scratch tree also holds intermediates named DeskPins that are executable
-# but are not Mach-O images, so candidates are filtered by asking lipo to read them.
-if [ ! -x "$BINARY" ] || ! lipo -archs "$BINARY" >/dev/null 2>&1; then
-    BINARY=""
-    while IFS= read -r candidate; do
-        if lipo -archs "$candidate" >/dev/null 2>&1; then BINARY="$candidate"; break; fi
-    done < <(find "$SCRATCH" -type f -perm -111 -name DeskPins \
-                  -not -path '*Intermediates*' -print 2>/dev/null)
+if [ "${#SLICES[@]}" -lt 2 ]; then
+    echo "warning: only one architecture built; this bundle is not universal."
 fi
-echo "==> binary: ${BINARY:-<none found>}"
-test -x "${BINARY:-}" || { echo "Build produced no binary under $SCRATCH" >&2; exit 1; }
 
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"

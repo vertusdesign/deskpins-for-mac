@@ -27,6 +27,9 @@ First public release.
   granted permissions survive rebuilds and dylib injection is blocked.
 
 ### Fixed before release
+- The app ships as a universal binary and runs natively on Apple silicon. Earlier images
+  carried an Intel-only build, which needed Rosetta on an M-series Mac. Each slice is built
+  with an explicit target triple and merged with `lipo`, so no full Xcode is required.
 - Pinning is limited to one window per desktop; pinning another releases the previous one on
   that desktop. Two pinned windows on one desktop cannot both behave correctly — selecting
   one either buried it under the other or made clicks bounce between them — and no public API

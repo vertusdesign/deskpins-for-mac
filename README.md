@@ -6,6 +6,20 @@ Keep any window above the others. A menu-bar utility for macOS, inspired by
 **Status: alpha (0.9.0).** The core feature works. Some rough edges remain — see
 [Known limitations](#known-limitations).
 
+> ### ⚠️ macOS will block the first launch — this is expected
+>
+> DeskPins for Mac is **not notarized by Apple** (notarization requires a paid Apple
+> Developer account). On first launch macOS says *"Apple could not verify DeskPins is free
+> of malware"* and offers only **Done** and **Move to Bin**.
+>
+> **Press Done**, then open **System Settings → Privacy & Security**, scroll to
+> **Security**, and press **Open Anyway** next to the DeskPins line. That is it — once only.
+>
+> On macOS 15 and newer the old right-click → Open trick no longer works for unnotarized
+> apps. If you prefer the terminal, `xattr -d com.apple.quarantine /Applications/DeskPins.app`
+> does the same thing. Building from source avoids the warning entirely, because nothing is
+> downloaded and so nothing is quarantined.
+
 - Pin the frontmost window with a global shortcut (⌃⌥⌘P by default) or from the menu
 - Unpin by clicking the green pin badge on the window, or from the menu
 - Configurable shortcut, which can also be switched off entirely
@@ -18,16 +32,12 @@ Keep any window above the others. A menu-bar utility for macOS, inspired by
 Download the disk image from the [latest release](https://github.com/vertusdesign/deskpins-for-mac/releases/latest),
 open it and drag **DeskPins.app** onto **Applications**.
 
-The app is **not notarized by Apple**, so macOS blocks the first launch with
-*"Apple could not verify DeskPins is free of malware"*. To allow it:
+One disk image covers both processor families: the app is a universal binary and runs
+natively on Apple silicon and on Intel, no Rosetta involved.
 
-1. In that dialog press **Done** — never *Move to Bin*.
-2. Open **System Settings → Privacy & Security** and scroll to the **Security** section.
-   There is a line saying DeskPins was blocked, with an **Open Anyway** button.
-3. Press it, authenticate, and confirm.
-
-Once only. On macOS 15 and newer the old right-click → Open shortcut no longer works for
-unnotarized apps; Open Anyway is the way.
+**Then allow it past Gatekeeper — see the notice at the top of this page.** The app is not
+notarized, so the first launch is blocked until you press **Open Anyway** in
+**System Settings → Privacy & Security**. Once only.
 
 If you prefer the terminal, this does the same thing by clearing the download quarantine
 flag:

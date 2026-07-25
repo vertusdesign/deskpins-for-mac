@@ -109,3 +109,15 @@ delete that paragraph from the README, DISCLAIMER and disk-image note.
 ```
 
 Then attach the `.dmg` and its `.sha256` to a GitHub release tagged `v<version>-<stage>`.
+
+## S-10 Universal binary
+
+The bundle MUST be universal (`arm64` + `x86_64`). Each slice is built separately with an
+explicit target triple and merged with `lipo`.
+
+`swift build --arch arm64 --arch x86_64` MUST NOT be relied on: it routes through xcbuild,
+which ships only with full Xcode, so it fails on a machine that has just the Command Line
+Tools. Explicit triples need no xcbuild and work anywhere.
+
+A missing slice MUST NOT fail the build — it warns and ships what it has, so a toolchain
+that cannot cross-compile still produces a working app for its own architecture.
