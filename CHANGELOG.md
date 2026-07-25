@@ -26,6 +26,13 @@ First public release.
 - Signed with the hardened runtime and a certificate-based designated requirement, so
   granted permissions survive rebuilds and dylib injection is blocked.
 
+### Fixed before release
+- Both permissions are now requested, not just the first missing one. Requesting is what
+  registers an app in the System Settings list, so stopping at Accessibility left the app
+  absent from Screen Recording and users had to add it by hand.
+- The menu is refilled every time it opens. Permission state is read while building it, and
+  at launch TCC has often not caught up, which left a stale warning row in place.
+
 ### Known limitations
 - The floating copy is an image; interacting with an inactive pinned window takes one click.
 - macOS marks captured windows with its own indicator, which cannot be suppressed.

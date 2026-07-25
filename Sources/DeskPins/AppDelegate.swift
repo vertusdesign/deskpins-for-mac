@@ -1,6 +1,6 @@
 import AppKit
 
-final class AppDelegate: NSObject, NSApplicationDelegate {
+final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var statusItem: NSStatusItem!
     private var settingsController: SettingsWindowController?
     private var aboutController: AboutWindowController?
@@ -16,9 +16,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         HotKeyCenter.shared.action = { [weak self] in self?.pinFrontmost() }
         HotKeyCenter.shared.apply(Settings.shortcut)
 
-        // Only the system's own permission dialog — DeskPins never puts up its own,
-        // which would just cover the system one.
-        if !AX.isTrusted { AX.requestTrust(prompt: true) }
+        requestMissingPermissions()
         refreshMenu()
     }
 
@@ -33,11 +31,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem.button?.image = NSImage(systemSymbolName: "pin.fill",
                                            accessibilityDescription: "DeskPins")
         statusItem.button?.image?.isTemplate = true
-        statusItem.menu = NSMenu()
+        let menu = NSMenu()
+        menu.delegate = self
+        statusItem.menu = menu
     }
 
     private func refreshMenu() {
-        let menu = NSMenu()
+        guard let menu = statusItem.menu else { return }
+        // The same menu object is refilled rather than replaced: swapping `statusItem.menu`
+        // while the menu is being opened glitches the display.
+        menu.removeAllItems()
 
         let pinItem = NSMenuItem(title: L10n.t(.pinFrontmost),
                                  action: #selector(pinFrontmost), keyEquivalent: "")
@@ -118,7 +121,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                               action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         menu.addItem(quit)
 
-        statusItem.menu = menu
+    }
+
+    /// Permission state is read while the menu is built, and at launch TCC has often not
+    /// caught up yet — which left a stale "permission required" warning sitting in the menu
+    /// long after the permission had been granted. Refilling before every display fixes
+    /// that, and keeps pinned-window titles current too.
+    func menuNeedsUpdate(_ menu: NSMenu) {
+        refreshMenu()
     }
 
     private func languageMenuItem() -> NSMenuItem {
@@ -204,19 +214,33 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// Missing permission only triggers the system's own dialog and a warning row in the
     /// menu. An alert of our own would appear on top of the system dialog and hide it.
     private func requirePermissions() -> Bool {
-        guard AX.isTrusted else {
+        let missing = requestMissingPermissions()
+        guard !missing.isEmpty else { return true }
+        refreshMenu()
+        flashStatusTitle(missing[0])
+        return false
+    }
+
+    /// Asks for every permission that is still missing, and returns their names.
+    ///
+    /// Both are requested, never just the first one. Asking is what puts the app into the
+    /// System Settings list: `AXIsProcessTrustedWithOptions` registers it under
+    /// Accessibility and `CGRequestScreenCaptureAccess` under Screen Recording. Stopping
+    /// after the first missing permission left the app absent from the Screen Recording
+    /// list entirely, so a new user had to add it by hand with the "+" button.
+    @discardableResult
+    private func requestMissingPermissions() -> [String] {
+        var missing: [String] = []
+
+        if !AX.isTrusted {
             AX.requestTrust(prompt: true)
-            refreshMenu()
-            flashStatusTitle(L10n.t(.accessibilityNeeded))
-            return false
+            missing.append(L10n.t(.accessibilityNeeded))
         }
-        guard ScreenCapturePermission.isGranted else {
+        if !ScreenCapturePermission.isGranted {
             ScreenCapturePermission.request()
-            refreshMenu()
-            flashStatusTitle(L10n.t(.screenRecordingNeeded))
-            return false
+            missing.append(L10n.t(.screenRecordingNeeded))
         }
-        return true
+        return missing
     }
 
     @objc private func openAccessibilitySettings() {

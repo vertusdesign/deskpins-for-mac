@@ -41,8 +41,17 @@ DeskPins for Mac — installation
    Grant both in System Settings > Privacy & Security, then restart the app.
    macOS does not apply new permissions to an already running process.
 
-The app is not notarized by Apple, so the first launch needs a detour:
-right-click DeskPins.app > Open > Open. This is required only once.
+The app is not notarized by Apple, so macOS blocks the first launch with
+"Apple could not verify DeskPins is free of malware".
+
+To allow it:
+  1. Press "Done" in that dialog. Never press "Move to Bin".
+  2. Open System Settings > Privacy & Security and scroll to Security.
+     A line says DeskPins was blocked, with an "Open Anyway" button.
+  3. Press it, authenticate, confirm.
+
+Required only once. On macOS 15 and newer the old right-click > Open
+shortcut no longer works for unnotarized apps.
 
 Source, licence and terms: https://github.com/vertusdesign/deskpins-for-mac
 TXT

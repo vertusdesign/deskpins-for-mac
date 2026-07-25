@@ -36,7 +36,9 @@ manager, a private conversation, or anything else you would not put on a project
 ## Not notarized by Apple
 
 Builds are signed with a local certificate, not an Apple Developer ID, and are not
-notarized. macOS Gatekeeper will warn you on first launch; that warning is accurate. Only
+notarized. macOS Gatekeeper blocks the first launch and says Apple could not verify the app; that
+warning is accurate — nobody has scanned this build but its author. Allow it in
+System Settings → Privacy & Security → Open Anyway if you accept that. Only
 download builds from
 <https://github.com/vertusdesign/deskpins-for-mac/releases> and check the published
 SHA-256 if you care to.

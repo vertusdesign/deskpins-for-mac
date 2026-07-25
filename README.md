@@ -18,8 +18,23 @@ Keep any window above the others. A menu-bar utility for macOS, inspired by
 Download the disk image from the [latest release](https://github.com/vertusdesign/deskpins-for-mac/releases/latest),
 open it and drag **DeskPins.app** onto **Applications**.
 
-The app is **not notarized by Apple**, so the first launch needs a detour: right-click
-DeskPins.app → **Open** → **Open**. Once only.
+The app is **not notarized by Apple**, so macOS blocks the first launch with
+*"Apple could not verify DeskPins is free of malware"*. To allow it:
+
+1. In that dialog press **Done** — never *Move to Bin*.
+2. Open **System Settings → Privacy & Security** and scroll to the **Security** section.
+   There is a line saying DeskPins was blocked, with an **Open Anyway** button.
+3. Press it, authenticate, and confirm.
+
+Once only. On macOS 15 and newer the old right-click → Open shortcut no longer works for
+unnotarized apps; Open Anyway is the way.
+
+If you prefer the terminal, this does the same thing by clearing the download quarantine
+flag:
+
+```bash
+xattr -d com.apple.quarantine /Applications/DeskPins.app
+```
 
 ### Permissions
 
@@ -68,7 +83,8 @@ The full reasoning, including the two approaches that were tried and rejected, i
   not active takes one click to bring it forward first.
 - macOS marks captured windows with its own "being captured" indicator. That indicator is
   a system privacy feature and cannot be suppressed by the capturing app.
-- Not notarized, so Gatekeeper needs the right-click → Open detour on first launch.
+- Not notarized, so Gatekeeper blocks the first launch until you allow it in
+  System Settings → Privacy & Security (see [Install](#install)).
 - Right-to-left languages are translated but the layout is not mirrored.
 
 ## Build from source
