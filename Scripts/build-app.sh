@@ -19,21 +19,27 @@ mkdir -p "$SCRATCH"
 
 # Universal binary when the toolchain can cross-compile, otherwise host-only.
 # `${arr[@]+...}` keeps bash 3.2 (the system bash) from tripping over an empty array under `set -u`.
-ARCH_FLAGS=(--arch arm64 --arch x86_64)
-if ! swift build -c release --scratch-path "$SCRATCH" "${ARCH_FLAGS[@]}" 2>/dev/null; then
-    echo "Universal build unavailable, building for the host architecture only."
-    ARCH_FLAGS=()
+UNIVERSAL=yes
+if swift build -c release --scratch-path "$SCRATCH" --arch arm64 --arch x86_64; then
+    echo "==> universal build succeeded"
+else
+    echo "==> universal build unavailable, building for the host architecture only"
+    UNIVERSAL=no
     swift build -c release --scratch-path "$SCRATCH"
 fi
 
-BIN_DIR="$(swift build -c release --scratch-path "$SCRATCH" ${ARCH_FLAGS[@]+"${ARCH_FLAGS[@]}"} --show-bin-path 2>/dev/null || true)"
-BINARY="$BIN_DIR/DeskPins"
-
-# A universal build goes through xcbuild, whose product layout `--show-bin-path` does not
-# report — it fails outright there. Fall back to locating the executable in the scratch tree.
-if [ ! -x "$BINARY" ]; then
-    BINARY="$(find "$SCRATCH" -type f -perm -111 -name DeskPins -path '*Release*' 2>/dev/null | head -1)"
+# `--show-bin-path` reports the SwiftPM layout, which only exists for a host-only build; a
+# universal build goes through xcbuild and puts the merged binary elsewhere. Ask only when
+# the answer is meaningful, and fall back to searching the scratch tree either way.
+BINARY=""
+if [ "$UNIVERSAL" = no ]; then
+    BIN_DIR="$(swift build -c release --scratch-path "$SCRATCH" --show-bin-path)"
+    BINARY="$BIN_DIR/DeskPins"
 fi
+if [ ! -x "$BINARY" ]; then
+    BINARY="$(find "$SCRATCH" -type f -perm -111 -name DeskPins -path '*Release*' -print 2>/dev/null | head -1 || true)"
+fi
+echo "==> binary: ${BINARY:-<none found>}"
 test -x "${BINARY:-}" || { echo "Build produced no binary under $SCRATCH" >&2; exit 1; }
 
 rm -rf "$APP"
