@@ -27,6 +27,14 @@ First public release.
   granted permissions survive rebuilds and dylib injection is blocked.
 
 ### Fixed before release
+- Screen Recording is requested on a delay when the Accessibility prompt is also going up:
+  two system prompts raised at once leave only one on screen, and the screen-recording one
+  was the casualty, so the app never reached that list until the following launch.
+- A pin attempt with a permission still missing now opens the relevant System Settings pane
+  instead of failing quietly, since macOS only ever shows its own prompt once.
+- Granting Screen Recording takes effect without quitting the app. The system preflight call
+  caches its answer for the process lifetime; a ScreenCaptureKit query is used as the
+  authority instead.
 - Both permissions are now requested, not just the first missing one. Requesting is what
   registers an app in the System Settings list, so stopping at Accessibility left the app
   absent from Screen Recording and users had to add it by hand.

@@ -96,6 +96,23 @@ The application MUST NOT display its own alert about missing permissions (B-4). 
 the system dialog, shows a warning row in the menu that opens the right System Settings
 pane, and briefly labels the status item.
 
+**U-8.1** Both permissions MUST be requested, never only the first one found missing.
+Requesting is what registers the app in the System Settings list — an app that never asks
+does not appear there, and the user has to add it by hand.
+
+**U-8.2** Two system permission prompts raised in the same instant end with only one of them
+on screen. The screen-recording request MUST therefore be deferred when the Accessibility
+prompt is also going up.
+
+**U-8.3** macOS shows each permission prompt only the first time. On a later attempt to pin
+with a permission still missing, the app MUST open the relevant System Settings pane rather
+than fail silently — at that point no system dialog is coming that ours could cover.
+
+**U-8.4** `CGPreflightScreenCaptureAccess` caches its answer for the lifetime of the
+process, so it keeps reporting "denied" after the user grants access. A successful
+ScreenCaptureKit query is the authority, and remembering it lets the permission take effect
+without quitting the app.
+
 ## U-9 Appearance
 
 Every colour except the badge gradient comes from a semantic `NSColor`, so light and dark

@@ -260,10 +260,39 @@ final class WindowMirror: NSObject, SCStreamOutput, SCStreamDelegate {
 
 /// Screen Recording permission — required before any window can be mirrored.
 enum ScreenCapturePermission {
-    static var isGranted: Bool { CGPreflightScreenCaptureAccess() }
+    /// `CGPreflightScreenCaptureAccess` caches its answer for the lifetime of the process,
+    /// so once it has said no it keeps saying no even after the user grants access. A
+    /// successful ScreenCaptureKit query is proof to the contrary, and is remembered here
+    /// so granting the permission does not require quitting the app.
+    private static var confirmedGranted = false
 
-    @discardableResult
-    static func request() -> Bool { CGRequestScreenCaptureAccess() }
+    static var isGranted: Bool {
+        if confirmedGranted { return true }
+        if CGPreflightScreenCaptureAccess() {
+            confirmedGranted = true
+            return true
+        }
+        return false
+    }
+
+    /// Asks for access, and registers the app in the Screen Recording list as a side effect.
+    ///
+    /// Both routes are used deliberately. `CGRequestScreenCaptureAccess` is the documented
+    /// request, but a ScreenCaptureKit query is what reliably registers the app and, unlike
+    /// the preflight call, reports the permission's live state rather than a cached one.
+    static func request(completion: ((Bool) -> Void)? = nil) {
+        _ = CGRequestScreenCaptureAccess()
+        Task { @MainActor in
+            do {
+                _ = try await SCShareableContent.excludingDesktopWindows(
+                    false, onScreenWindowsOnly: true)
+                confirmedGranted = true
+                completion?(true)
+            } catch {
+                completion?(false)
+            }
+        }
+    }
 
     static func openSettings() {
         let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture")!

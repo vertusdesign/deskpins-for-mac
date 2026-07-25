@@ -4,6 +4,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var statusItem: NSStatusItem!
     private var settingsController: SettingsWindowController?
     private var aboutController: AboutWindowController?
+    private var hasAskedForAccessibility = false
+    private var hasAskedForScreenRecording = false
     private let manager = PinManager.shared
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -16,7 +18,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         HotKeyCenter.shared.action = { [weak self] in self?.pinFrontmost() }
         HotKeyCenter.shared.apply(Settings.shortcut)
 
-        requestMissingPermissions()
+        requestMissingPermissions(interactive: false)
         refreshMenu()
     }
 
@@ -214,7 +216,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     /// Missing permission only triggers the system's own dialog and a warning row in the
     /// menu. An alert of our own would appear on top of the system dialog and hide it.
     private func requirePermissions() -> Bool {
-        let missing = requestMissingPermissions()
+        let missing = requestMissingPermissions(interactive: true)
         guard !missing.isEmpty else { return true }
         refreshMenu()
         flashStatusTitle(missing[0])
@@ -225,22 +227,49 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     ///
     /// Both are requested, never just the first one. Asking is what puts the app into the
     /// System Settings list: `AXIsProcessTrustedWithOptions` registers it under
-    /// Accessibility and `CGRequestScreenCaptureAccess` under Screen Recording. Stopping
-    /// after the first missing permission left the app absent from the Screen Recording
-    /// list entirely, so a new user had to add it by hand with the "+" button.
+    /// Accessibility and the screen-capture request under Screen Recording. Stopping after
+    /// the first missing permission left the app absent from the Screen Recording list
+    /// entirely, so a new user had to add it by hand with the "+" button.
+    ///
+    /// - Parameter interactive: true when the user just tried to pin something, in which
+    ///   case a permission macOS will no longer prompt for opens System Settings instead of
+    ///   failing quietly.
     @discardableResult
-    private func requestMissingPermissions() -> [String] {
+    private func requestMissingPermissions(interactive: Bool) -> [String] {
         var missing: [String] = []
 
         if !AX.isTrusted {
             AX.requestTrust(prompt: true)
             missing.append(L10n.t(.accessibilityNeeded))
+            if interactive && hasAskedForAccessibility { openAccessibilitySettings() }
+            hasAskedForAccessibility = true
         }
         if !ScreenCapturePermission.isGranted {
-            ScreenCapturePermission.request()
             missing.append(L10n.t(.screenRecordingNeeded))
+            requestScreenRecording(interactive: interactive)
         }
         return missing
+    }
+
+    private func requestScreenRecording(interactive: Bool) {
+        // Two system permission prompts raised in the same instant end with only one of
+        // them on screen, and the screen-recording one was the casualty — which is why the
+        // app did not appear in that list until the next launch. Let the Accessibility
+        // prompt land first.
+        let delay: TimeInterval = AX.isTrusted ? 0 : 1.0
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+            ScreenCapturePermission.request { granted in
+                guard let self else { return }
+                self.refreshMenu()
+                guard !granted else { return }
+                // macOS shows its own prompt only the first time. After that a pin attempt
+                // would fail in silence, so send the user where they can fix it.
+                if interactive && self.hasAskedForScreenRecording {
+                    ScreenCapturePermission.openSettings()
+                }
+                self.hasAskedForScreenRecording = true
+            }
+        }
     }
 
     @objc private func openAccessibilitySettings() {
