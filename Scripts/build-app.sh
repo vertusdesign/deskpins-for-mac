@@ -88,7 +88,9 @@ PLIST
 # names the signer, while an ad-hoc one can only name the binary's hash, which changes on
 # every build. Run Scripts/create-signing-cert.sh once to set it up.
 CERT_NAME="DeskPins Local Signing"
-CERT_SHA="$(security find-certificate -c "$CERT_NAME" -Z 2>/dev/null | awk '/SHA-1 hash/{print $3}')"
+# `security find-certificate` exits 44 when the certificate is absent, which under
+# `set -o pipefail` would abort the whole script instead of falling back to ad-hoc signing.
+CERT_SHA="$(security find-certificate -c "$CERT_NAME" -Z 2>/dev/null | awk '/SHA-1 hash/{print $3}' || true)"
 
 if [ -n "$CERT_SHA" ]; then
     # --options runtime turns on the hardened runtime, which enables library validation.
