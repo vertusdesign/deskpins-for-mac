@@ -126,7 +126,6 @@ final class PinManager {
 
         // Only windows on the Space the user is looking at right now.
         let onScreen = WindowFinder.onScreenWindowIDs()
-        let present = pins.filter { onScreen.contains($0.windowID) }
 
         for pin in pins {
             let onCurrentSpace = onScreen.contains(pin.windowID)
@@ -135,11 +134,8 @@ final class PinManager {
             // same app being raised over it does not count, which is what keeps the pinned
             // window visible above its siblings.
             let isActive = onCurrentSpace && pin.pid == frontPid && pin.isFocusedInApp
-            let hasCompany = present.contains { $0 !== pin }
 
-            pin.apply(Pin.Placement(onCurrentSpace: onCurrentSpace,
-                                    isActive: isActive,
-                                    hasCompany: hasCompany))
+            pin.apply(Pin.Placement(onCurrentSpace: onCurrentSpace, isActive: isActive))
             if allowRaise && isActive { pin.raiseWithinApp() }
         }
     }

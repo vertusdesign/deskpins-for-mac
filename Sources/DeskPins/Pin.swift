@@ -180,12 +180,9 @@ final class Pin {
         var onCurrentSpace: Bool
         /// The user is working in this very window.
         var isActive: Bool
-        /// Another pin is also on screen, so this one's mirror has to hold its place in
-        /// the stack even while active.
-        var hasCompany: Bool
     }
 
-    private var placement = Placement(onCurrentSpace: true, isActive: false, hasCompany: false)
+    private var placement = Placement(onCurrentSpace: true, isActive: false)
 
     func apply(_ new: Placement) {
         placement = new
@@ -202,14 +199,15 @@ final class Pin {
             return
         }
 
-        // While the user is working in the pinned window the real thing is right there,
-        // so the mirror is only worth running when it has to outrank another pin's mirror.
-        // Dragging always falls back to the real window: a mirror would lag behind it.
-        let wanted = !(placement.isActive && (!placement.hasCompany || isDragging))
+        // While the user is working in the pinned window, the real window is right there
+        // and is what they interact with, so the mirror stands down.
+        //
+        // Raising the active pin's mirror above the other pins and making it click-through
+        // was tried and is wrong twice over: it hides the other pinned windows behind the
+        // one in use, and clicks falling through it land in the next mirror down, which
+        // activates that pin and starts an unusable ping-pong between them.
+        let wanted = !placement.isActive
         isMirroring = wanted
-
-        mirror.setPassThrough(placement.isActive)
-        mirror.setLevel(placement.isActive ? WindowMirror.activeLevel : WindowMirror.restingLevel)
 
         if wanted {
             syncGeometry()

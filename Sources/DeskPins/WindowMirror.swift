@@ -10,8 +10,10 @@ import CoreMedia
 /// are working in. A window we own, however, obeys `NSWindow.level`, so we float our own
 /// panel and stream the target window's pixels into it.
 ///
-/// The mirror is only alive while the target app is in the background; the moment its own
-/// app comes forward the real window is on top anyway and we shut the capture down.
+/// The mirror is only alive while the user is not working in the pinned window; the moment
+/// that window becomes the focused one, the real thing is right there to interact with and
+/// the capture is shut down. All mirrors share one level — raising the active one above the
+/// others hid those windows behind it and made clicks ping-pong between the two.
 final class WindowMirror: NSObject, SCStreamOutput, SCStreamDelegate {
 
     private let windowID: CGWindowID
@@ -78,27 +80,6 @@ final class WindowMirror: NSObject, SCStreamOutput, SCStreamDelegate {
         panel.setFrame(Coord.cocoa(from: quartz), display: false)
 
         if sizeChanged, wantsCapture { scheduleRestart() }
-    }
-
-    // MARK: - Layering and interaction
-
-    /// Level for a mirror the user is not working in.
-    static let restingLevel = NSWindow.Level(rawValue: NSWindow.Level.floating.rawValue)
-    /// The pinned window the user is actually using floats above the other mirrors.
-    static let activeLevel = NSWindow.Level(rawValue: NSWindow.Level.floating.rawValue + 1)
-
-    func setLevel(_ level: NSWindow.Level) {
-        guard panel.level != level else { return }
-        panel.level = level
-    }
-
-    /// Lets clicks fall through to the real window sitting directly underneath.
-    ///
-    /// Used while the pinned window is the one the user is working in: the mirror stays
-    /// visible so it keeps its place above the other pinned windows, but every click,
-    /// scroll and drag reaches the real window instead of stopping at a picture of it.
-    func setPassThrough(_ passThrough: Bool) {
-        panel.ignoresMouseEvents = passThrough
     }
 
     // MARK: - Capture lifecycle
