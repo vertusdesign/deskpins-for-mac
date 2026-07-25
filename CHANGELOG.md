@@ -27,6 +27,10 @@ First public release.
   granted permissions survive rebuilds and dylib injection is blocked.
 
 ### Fixed before release
+- With two or more windows pinned, clicking one did not give it back: its mirror was raised
+  above the other pins and made click-through, so clicks fell through into the next mirror
+  down, activated that pin instead, and the two swapped places on every click. All mirrors
+  now share one level and the active pin shows its real window.
 - Screen Recording is requested on a delay when the Accessibility prompt is also going up:
   two system prompts raised at once leave only one on screen, and the screen-recording one
   was the casualty, so the app never reached that list until the following launch.

@@ -44,9 +44,18 @@ above its siblings. Detected via `kAXFocusedWindowChangedNotification` observed 
 **B-8** The mirror is shown whenever the pin is on the current Space and not minimized,
 **except** in the two cases below, where the real window is right there and better.
 
-**B-9** Not shown when the pin is active and has no company: with a single pinned window
-that the user is working in, there is nothing to overlap, so the capture is not started at
-all. This preserves zero cost in the common case.
+**B-9** Not shown when the pin is active — the user is working in that window, so the real
+one is what should receive input, and no capture is started at all.
+
+**B-9.1** All mirrors MUST share one window level, and the active pin's mirror MUST NOT be
+raised above the others and made click-through. That was tried and MUST NOT be reintroduced:
+the raised mirror covers the other pinned windows, which is the opposite of pinning them, and
+a click passing through it lands in the next mirror down, activating that pin — the two then
+swap levels on every click and neither window can be used.
+
+The consequence is accepted deliberately: the window being worked in sits below the other
+pinned windows. That is what pinning those windows means, and no public API can lift another
+application's real window above a panel we own.
 
 **B-10** Not shown while its window is being dragged: a captured copy lags behind the window
 it mirrors, which reads as smearing.

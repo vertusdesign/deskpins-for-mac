@@ -43,7 +43,10 @@ DeskPins owns zero on-screen windows, and after it ends, one again — the badge
 reports layers 3 (resting mirror), 4 (active mirror) and 5 (both badges) — B-12, B-13.
 
 **AC-12 [scriptable]** Pin one window of an application that has several. While it is
-focused, DeskPins owns one on-screen window (badge only — B-9). Raise a sibling window: two,
+focused, DeskPins owns one on-screen window (badge only — B-9). Pin a second window in
+another application and select the first: DeskPins owns three on-screen windows — two badges
+and one mirror, the inactive pin's — all mirrors on the same layer (B-9.1). Raise a sibling
+window: two,
 because the mirror appears above the sibling (B-7).
 
 **AC-13** Clicking the active pin's mirror interacts with the real window beneath it rather
