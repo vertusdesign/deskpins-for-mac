@@ -4,6 +4,11 @@ All notable changes are recorded here. This project follows
 [Semantic Versioning](https://semver.org/) once it reaches 1.0; until then the minor
 version carries breaking changes.
 
+## [Unreleased]
+
+### Added
+- Belarusian interface language, listed third in the Language menu after Ukrainian.
+
 ## [0.9.0-alpha] — 2026-07-25
 
 First public release.

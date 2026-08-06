@@ -15,9 +15,9 @@ that overrides the system language at runtime.
 
 ## L-2 Languages
 
-Sixteen, by ISO 639-1 code:
+Seventeen, by ISO 639-1 code:
 
-`en`, `uk`, `ar`, `de`, `el`, `es`, `fr`, `hi`, `it`, `ja`, `ko`, `pl`, `pt`, `tr`, `vi`, `zh`
+`en`, `uk`, `be`, `ar`, `de`, `el`, `es`, `fr`, `hi`, `it`, `ja`, `ko`, `pl`, `pt`, `tr`, `vi`, `zh`
 
 ## L-3 Default and fallback
 
@@ -27,7 +27,7 @@ key name.
 
 ## L-4 Menu order
 
-English and Ukrainian first, in that order. Everything else sorted by **native name** using
+English, Ukrainian and Belarusian first, in that order. Everything else sorted by **native name** using
 `localizedStandardCompare`. Languages are listed under their own names — someone looking for
 their language does not know what it is called in the one currently displayed.
 

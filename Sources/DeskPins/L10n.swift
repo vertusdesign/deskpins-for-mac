@@ -3,13 +3,14 @@ import Foundation
 /// Languages DeskPins ships with. English is both the default and the fallback for any
 /// string a table happens to be missing.
 enum Language: String, CaseIterable {
-    case en, uk, ar, de, el, es, fr, hi, it, ja, ko, pl, pt, tr, vi, zh
+    case en, uk, be, ar, de, el, es, fr, hi, it, ja, ko, pl, pt, tr, vi, zh
 
     /// Shown in the menu — a language is easiest to find under its own name.
     var nativeName: String {
         switch self {
         case .en: return "English"
         case .uk: return "Українська"
+        case .be: return "Беларуская"
         case .ar: return "العربية"
         case .de: return "Deutsch"
         case .el: return "Ελληνικά"
@@ -27,9 +28,9 @@ enum Language: String, CaseIterable {
         }
     }
 
-    /// English and Ukrainian first, everything else alphabetically by its native name.
+    /// English, Ukrainian and Belarusian first, everything else alphabetically by its native name.
     static let menuOrder: [Language] = {
-        let pinned: [Language] = [.en, .uk]
+        let pinned: [Language] = [.en, .uk, .be]
         let rest = allCases.filter { !pinned.contains($0) }
             .sorted { $0.nativeName.localizedStandardCompare($1.nativeName) == .orderedAscending }
         return pinned + rest
@@ -91,6 +92,7 @@ enum L10n {
         switch language {
         case .en: return en
         case .uk: return uk
+        case .be: return be
         case .ar: return ar
         case .de: return de
         case .el: return el
@@ -166,6 +168,36 @@ enum L10n {
         .aboutTerms: "Умови використання",
         .aboutDisclaimer: "Застереження",
         .aboutPrivacy: "Політика конфіденційності",
+    ]
+
+    private static let be: [StringKey: String] = [
+        .pinFrontmost: "Замацаваць актыўнае акно",
+        .noPinnedWindows: "Няма замацаваных вокнаў",
+        .pinnedHeader: "Замацавана",
+        .unpinAll: "Адмацаваць усе",
+        .clickToUnpin: "Націсніце, каб адмацаваць",
+        .settings: "Налады…",
+        .language: "Мова",
+        .launchAtLogin: "Запускаць пры ўваходзе",
+        .quit: "Выйсці з DeskPins for Mac",
+        .accessibilityNeeded: "Патрабуецца доступ да Спецыяльных магчымасцяў…",
+        .screenRecordingNeeded: "Патрабуецца доступ да запісу экрана…",
+        .noWindow: "няма акна",
+        .shortcutTitle: "Глабальнае спалучэнне клавіш:",
+        .shortcutRecord: "Націсніце, каб запісаць",
+        .shortcutPress: "Націсніце клавішы…",
+        .shortcutNone: "Выключана",
+        .shortcutHint: "Замацоўвае актыўнае акно. Націсніце ⌫, каб выключыць спалучэнне.",
+        .shortcutRestoreDefault: "Аднавіць стандартнае",
+        .settingsWindowTitle: "Налады DeskPins for Mac",
+        .about: "Пра DeskPins for Mac",
+        .aboutTagline: "Утрымлівае любое акно па-над астатнімі.",
+        .aboutAlphaNotice: "Альфа-версія — некаторыя шурпатасці яшчэ застаюцца.",
+        .aboutInspiredBy: "Натхнёна праектам DeskPins для Windows",
+        .aboutSource: "Зыходны код",
+        .aboutTerms: "Умовы выкарыстання",
+        .aboutDisclaimer: "Агаворка",
+        .aboutPrivacy: "Палітыка канфідэнцыйнасці",
     ]
 
     private static let ar: [StringKey: String] = [

@@ -25,7 +25,7 @@ Keep any window above the others. A menu-bar utility for macOS, inspired by
 - Unpin by clicking the green pin badge on the window, or from the menu
 - Configurable shortcut, which can also be switched off entirely
 - Optional launch at login
-- 16 interface languages
+- 17 interface languages
 - No Dock icon, no background polling, no network access of any kind
 
 ## Install

@@ -85,8 +85,8 @@ and enabled otherwise.
 
 ## Localization and identity
 
-**AC-24 [scriptable]** The Language submenu lists sixteen languages, English and Ukrainian
-first, and carries the globe symbol (U-2).
+**AC-24 [scriptable]** The Language submenu lists seventeen languages, English, Ukrainian and
+Belarusian first, and carries the globe symbol (U-2).
 
 **AC-25** Selecting a language changes the menu, Settings and About immediately, without a
 restart (L-5).
