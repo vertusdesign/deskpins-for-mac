@@ -125,6 +125,18 @@ process, so it keeps reporting "denied" after the user grants access. A successf
 ScreenCaptureKit query is the authority, and remembering it lets the permission take effect
 without quitting the app.
 
+**U-8.5 [constraint]** A `x-apple.systempreferences:` deep link **MUST** be sent a second
+time when System Settings was not already running. Opening it cold drops the anchor: the
+app launches on **General** and the pane is never reached — which is precisely the first-run
+case, when System Settings is closed and the user has just been told to grant something.
+
+Measured on macOS 26: a cold open lands on General with the legacy
+`com.apple.preference.security` identifier **and** with the newer
+`com.apple.settings.PrivacySecurity.extension`; both navigate correctly once the app is
+warm. The identifier is therefore not the variable and an OS-version switch fixes nothing —
+the launch is what loses the anchor. 0.5 s between the two sends was sufficient; 0.8 s is
+used for margin. Both panes go through one helper, `PrivacySettings.open(_:)`.
+
 ## U-9 Appearance
 
 Every colour except the badge gradient comes from a semantic `NSColor`, so light and dark

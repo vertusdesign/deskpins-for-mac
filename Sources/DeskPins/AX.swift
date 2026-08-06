@@ -65,6 +65,42 @@ enum AX {
     }
 }
 
+/// Deep links into the Privacy & Security panes the app sends users to.
+enum PrivacySettings {
+    /// The anchor identifying a row inside Privacy & Security.
+    enum Pane: String {
+        case accessibility = "Privacy_Accessibility"
+        case screenRecording = "Privacy_ScreenCapture"
+    }
+
+    private static let settingsBundleID = "com.apple.systempreferences"
+
+    /// Opens System Settings on `pane`.
+    ///
+    /// **[constraint]** The anchor is dropped when System Settings has to launch first:
+    /// the app comes up on General and the deep link is lost. Measured on macOS 26 — a
+    /// cold open lands on General with both the `com.apple.preference.security` identifier
+    /// and the newer `com.apple.settings.PrivacySecurity.extension` one, and both navigate
+    /// correctly once it is already running. The identifier is therefore not the problem
+    /// and an OS-version switch does not help; the launch is. So the URL is sent a second
+    /// time once the app is up. 0.5 s was enough in testing, 0.8 s is the margin.
+    ///
+    /// A first launch is exactly when this is hit, since System Settings is rarely open —
+    /// which is why the permission warnings appeared to open the wrong pane.
+    static func open(_ pane: Pane) {
+        let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?\(pane.rawValue)")!
+        let isRunning = !NSRunningApplication
+            .runningApplications(withBundleIdentifier: settingsBundleID).isEmpty
+
+        NSWorkspace.shared.open(url)
+        guard !isRunning else { return }   // already warm: the first open navigates
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+            NSWorkspace.shared.open(url)
+        }
+    }
+}
+
 /// Conversions between Quartz (top-left origin) and Cocoa (bottom-left origin) coordinates.
 enum Coord {
     private static var flipHeight: CGFloat {

@@ -10,10 +10,17 @@ version carries breaking changes.
 - Belarusian interface language, listed third in the Language menu after Ukrainian.
 - **Check for Updates…** in the menu, below About, opening the releases page in the default
   browser. The app still contains no networking code — the page is opened, never fetched.
-- An `info.circle` icon on the About item. Check for Updates is deliberately left iconless,
-  so the globe and the info circle stay the only two marks in the menu.
+- An `info.circle` icon on the About item. Check for Updates is deliberately left iconless:
+  it opens a page rather than checking anything, and an icon would suggest an in-app updater
+  that does not exist.
 
 ### Fixed
+- The permission warnings opened System Settings on **General** instead of Privacy &
+  Security. A `x-apple.systempreferences:` deep link loses its anchor when System Settings
+  is not already running — which is exactly the first-run case the warnings exist for. The
+  link is now sent a second time once the app is up. This was not an identifier problem:
+  measured on macOS 26, the legacy and the current pane identifiers both fail cold and both
+  work warm, so switching on the OS version would have fixed nothing.
 - The row of links in the About window sat flush against both window edges in every
   language. The padding came from `NSStackView.edgeInsets`, but `fittingSize` — read before
   the stack had laid out — reports the content width with the insets left out, and the

@@ -109,6 +109,11 @@ the horizontal inset — it MUST NOT sit flush against them (U-7).
 **AC-28** With permissions revoked, pinning does not crash, shows warning rows in the menu,
 and displays no alert of the app's own (B-4).
 
+**AC-28.1** With System Settings **quit**, each permission warning row opens
+Privacy & Security on its own pane — Accessibility, or Screen & System Audio Recording — not
+General (U-8.5). Quit System Settings before each run; the bug is invisible once it is
+already open.
+
 ## Resources
 
 **AC-29** Idle with nothing pinned: 0 % CPU, roughly 23 MB resident.
