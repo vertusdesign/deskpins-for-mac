@@ -1,6 +1,6 @@
 # Privacy Policy
 
-**Last updated: 25 July 2026. Applies to DeskPins for Mac 0.9.0-alpha.**
+**Last updated: 6 August 2026. Applies to DeskPins for Mac 0.9.1-alpha.**
 
 DeskPins for Mac collects nothing, stores nothing about you, and sends nothing anywhere.
 This document exists because the app requests two powerful permissions, and you deserve a

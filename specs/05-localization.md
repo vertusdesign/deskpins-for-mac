@@ -67,6 +67,7 @@ the menu and any open Settings or About window without a restart.
 | `shortcutRestoreDefault` | Restore Default |
 | `settingsWindowTitle` | DeskPins for Mac Settings |
 | `about` | About DeskPins for Mac |
+| `checkForUpdates` | Check for Updates… |
 | `aboutTagline` | Keeps any window above the others. |
 | `aboutAlphaNotice` | Alpha version — some rough edges remain. |
 | `aboutInspiredBy` | Inspired by DeskPins for Windows |

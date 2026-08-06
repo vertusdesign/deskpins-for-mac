@@ -3,6 +3,9 @@ import AppKit
 /// Every outbound link the app offers, in one place.
 enum Links {
     static let repository = URL(string: "https://github.com/vertusdesign/deskpins-for-mac")!
+    /// Where a newer build is downloaded from. There is no in-app updater: the app has no
+    /// network access at all, so "check for updates" can only mean opening this page.
+    static let releases = URL(string: "https://github.com/vertusdesign/deskpins-for-mac/releases")!
     static let terms = URL(string: "https://github.com/vertusdesign/deskpins-for-mac/blob/main/TERMS.md")!
     static let privacy = URL(string: "https://github.com/vertusdesign/deskpins-for-mac/blob/main/PRIVACY.md")!
     static let disclaimer = URL(string: "https://github.com/vertusdesign/deskpins-for-mac/blob/main/DISCLAIMER.md")!
@@ -99,19 +102,36 @@ final class AboutWindowController: NSWindowController {
         stack.setCustomSpacing(18, after: alphaNotice)
         stack.setCustomSpacing(18, after: divider)
         stack.setCustomSpacing(16, after: linkRow)
-        stack.edgeInsets = NSEdgeInsets(top: 24, left: 24, bottom: 24, right: 24)
         stack.translatesAutoresizingMaskIntoConstraints = false
 
+        // The padding lives in these constraints rather than in `stack.edgeInsets`: read
+        // before the stack has laid out, `fittingSize` reports the content width with the
+        // insets left out, and sizing the window from it put the link row flush against
+        // both edges in every language.
         let content = NSView()
         content.addSubview(stack)
         NSLayoutConstraint.activate([
-            stack.leadingAnchor.constraint(equalTo: content.leadingAnchor),
-            stack.trailingAnchor.constraint(equalTo: content.trailingAnchor),
-            stack.topAnchor.constraint(equalTo: content.topAnchor),
-            stack.bottomAnchor.constraint(equalTo: content.bottomAnchor),
+            stack.leadingAnchor.constraint(equalTo: content.leadingAnchor,
+                                           constant: Metrics.horizontalInset),
+            stack.trailingAnchor.constraint(equalTo: content.trailingAnchor,
+                                            constant: -Metrics.horizontalInset),
+            stack.topAnchor.constraint(equalTo: content.topAnchor,
+                                       constant: Metrics.verticalInset),
+            stack.bottomAnchor.constraint(equalTo: content.bottomAnchor,
+                                          constant: -Metrics.verticalInset),
+            // A floor so the shortest translation still reads as a deliberate panel
+            // rather than a box shrink-wrapped around its widest row.
+            content.widthAnchor.constraint(greaterThanOrEqualToConstant: Metrics.minimumWidth),
         ])
         window.contentView = content
-        window.setContentSize(stack.fittingSize)
+        content.layoutSubtreeIfNeeded()
+        window.setContentSize(content.fittingSize)
+    }
+
+    private enum Metrics {
+        static let horizontalInset: CGFloat = 28
+        static let verticalInset: CGFloat = 24
+        static let minimumWidth: CGFloat = 420
     }
 
     func present() {

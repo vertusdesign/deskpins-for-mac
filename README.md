@@ -3,7 +3,7 @@
 Keep any window above the others. A menu-bar utility for macOS, inspired by
 [DeskPins](https://deskpins.com/) for Windows.
 
-**Status: alpha (0.9.0).** The core feature works. Some rough edges remain — see
+**Status: alpha (0.9.1).** The core feature works. Some rough edges remain — see
 [Known limitations](#known-limitations).
 
 > ### ⚠️ macOS will block the first launch — this is expected

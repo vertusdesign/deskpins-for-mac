@@ -29,7 +29,7 @@ containing at least
 | `CFBundleIdentifier` | `com.deskpins.mac` — **MUST NOT change** (P-9) |
 | `CFBundleExecutable` | `DeskPins` |
 | `CFBundleIconFile` | `AppIcon` |
-| `CFBundleShortVersionString` | `0.9.0` |
+| `CFBundleShortVersionString` | `0.9.1` |
 | `DPReleaseStage` | `alpha` — custom key, shown in About |
 | `LSMinimumSystemVersion` | `13.0` |
 | `LSUIElement` | `true` — menu-bar only, no Dock icon |
@@ -57,6 +57,9 @@ a dylib into the app and inherit its two TCC permissions. Verified by attempting
 with it.
 
 The script falls back to an ad-hoc signature with a loud warning when no certificate exists.
+The fallback still passes `--options runtime`: the two protections are independent, and only
+the certificate half is lost without a certificate. An ad-hoc signature carrying the
+hardened runtime reports `flags=0x10002(adhoc,runtime)`.
 
 ## S-6 The local certificate
 

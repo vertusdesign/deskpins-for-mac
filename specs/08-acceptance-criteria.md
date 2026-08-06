@@ -91,11 +91,18 @@ Belarusian first, and carries the globe symbol (U-2).
 **AC-25** Selecting a language changes the menu, Settings and About immediately, without a
 restart (L-5).
 
-**AC-26 [scriptable]** The menu's last two items are `About DeskPins for Mac` and
+**AC-26 [scriptable]** The menu's last three items are `About DeskPins for Mac` — carrying
+the `info.circle` symbol — then `Check for Updates…` with no icon, then
 `Quit DeskPins for Mac`.
 
-**AC-27 [scriptable]** About shows the icon, `DeskPins for Mac`, `Version 0.9.0 (alpha)`,
+**AC-26.1** `Check for Updates…` opens the releases page in the default browser. Nothing is
+fetched in-process: the app has no networking code (SP-4).
+
+**AC-27 [scriptable]** About shows the icon, `DeskPins for Mac`, `Version 0.9.1 (alpha)`,
 the tagline, the alpha notice, five links with accessible titles, and the copyright line.
+
+**AC-27.1 [scriptable]** In every language the link row clears both window edges by at least
+the horizontal inset — it MUST NOT sit flush against them (U-7).
 
 ## Permissions
 

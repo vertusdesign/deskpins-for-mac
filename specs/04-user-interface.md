@@ -24,8 +24,14 @@ Order, top to bottom:
 9. separator
 10. Permission warnings, when any permission is missing, each opening the relevant System
     Settings pane
-11. **About DeskPins for Mac**
-12. **Quit DeskPins for Mac** — ⌘Q
+11. **About DeskPins for Mac** — **MUST** carry the `info.circle` SF Symbol
+12. **Check for Updates…** — opens the releases page in the default browser; deliberately
+    **no** icon, because it checks nothing itself and an icon would advertise an in-app
+    updater that does not exist. The app has no networking code (SP-4)
+13. **Quit DeskPins for Mac** — ⌘Q
+
+AppKit adds its own gear to **Settings…** — that item is recognised by title and ⌘,, and the
+image is not set by this app.
 
 Pinned window titles are truncated to 44 characters. Each is labelled
 `Application — Window title`, falling back to the application name alone when the window has
@@ -79,7 +85,7 @@ Opened with ⌘, or from the menu. Re-reads every string when the language chang
 
 ## U-7 About window
 
-Centred column: application icon at 96 pt, display name, `Version 0.9.0 (alpha)` read from
+Centred column: application icon at 96 pt, display name, `Version 0.9.1 (alpha)` read from
 the bundle, one-line description, the alpha notice, a separator, then:
 
 - **Inspired by DeskPins for Windows** — links to <https://deskpins.com/>
@@ -89,6 +95,12 @@ the bundle, one-line description, the alpha notice, a separator, then:
 Links are borderless buttons with underlined link-coloured titles and the URL as tooltip;
 each MUST expose an accessible title. The window is rebuilt on each open so a language
 change is reflected.
+
+The column is inset 28 pt horizontally and 24 pt vertically, and the window is never
+narrower than 420 pt. The padding **MUST** come from constraints between the stack and the
+content view, not from `NSStackView.edgeInsets`: read before the stack has laid out,
+`fittingSize` omits the insets, and sizing the window from it puts the link row flush
+against both edges — the row is the widest element in most languages.
 
 ## U-8 Permission prompting
 

@@ -8,7 +8,7 @@ keep anything working.
 
 ## This is alpha software
 
-Version 0.9.0 is labelled alpha deliberately. The core feature — keeping a window above the
+Version 0.9.1 is labelled alpha deliberately. The core feature — keeping a window above the
 others — works and has been tested. Around it there are known rough edges, listed in the
 [README](README.md#known-limitations) and in
 [specs/08-acceptance-criteria.md](specs/08-acceptance-criteria.md).

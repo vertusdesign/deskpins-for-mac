@@ -117,7 +117,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let about = NSMenuItem(title: L10n.t(.about),
                                action: #selector(openAbout), keyEquivalent: "")
         about.target = self
+        about.image = NSImage(systemSymbolName: "info.circle", accessibilityDescription: L10n.t(.about))?
+            .withSymbolConfiguration(.init(pointSize: 13, weight: .regular))
+        about.image?.isTemplate = true
         menu.addItem(about)
+
+        // Deliberately iconless. It opens the releases page in the browser rather than
+        // checking anything itself, and an icon would advertise an in-app updater that
+        // does not exist.
+        let updates = NSMenuItem(title: L10n.t(.checkForUpdates),
+                                 action: #selector(openReleases), keyEquivalent: "")
+        updates.target = self
+        menu.addItem(updates)
 
         let quit = NSMenuItem(title: L10n.t(.quit),
                               action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
@@ -207,6 +218,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @objc private func openAbout() {
         if aboutController == nil { aboutController = AboutWindowController() }
         aboutController?.present()
+    }
+
+    @objc private func openReleases() {
+        NSWorkspace.shared.open(Links.releases)
     }
 
     // MARK: - Permissions

@@ -6,7 +6,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 APP="$ROOT/build/DeskPins.app"
 BUNDLE_ID="com.deskpins.mac"
-VERSION="0.9.0"
+VERSION="0.9.1"
 STAGE="alpha"
 APP_NAME="DeskPins for Mac"
 
@@ -116,7 +116,12 @@ else
     echo "warning: no local signing certificate — falling back to an ad-hoc signature."
     echo "         macOS will then forget the granted permissions on every rebuild."
     echo "         Fix once with: ./Scripts/create-signing-cert.sh"
-    codesign --force --sign - --identifier "$BUNDLE_ID" "$APP"
+    # Still --options runtime. The certificate is what keeps TCC grants alive across
+    # rebuilds; the hardened runtime is a separate, independent protection — it is what
+    # stops a local process injecting a dylib and inheriting this app's Accessibility and
+    # Screen Recording grants. Dropping it from the fallback shipped release images with
+    # library validation off, which is the more dangerous of the two failures.
+    codesign --force --options runtime --sign - --identifier "$BUNDLE_ID" "$APP"
 fi
 
 echo "Built:  $APP  ($(lipo -archs "$APP/Contents/MacOS/DeskPins"))"

@@ -54,7 +54,7 @@ macOS 13 or newer, on Apple silicon and Intel. Developed and verified on macOS 2
 
 ## P-8 Release stage
 
-0.9.0 is alpha: the core works and is verified, the edges are known and listed. The About
+0.9.1 is alpha: the core works and is verified, the edges are known and listed. The About
 window and the disk image both state this.
 
 ## P-9 Naming
