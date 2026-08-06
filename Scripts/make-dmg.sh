@@ -91,4 +91,6 @@ hdiutil create \
     "$DMG"
 
 echo "Disk image: $DMG  ($(du -h "$DMG" | cut -f1))"
-shasum -a 256 "$DMG" | tee "$DMG.sha256"
+# Recorded against the bare filename, not the build path: the checksum is published as a
+# release asset, and `shasum -a 256 -c` has to work in whatever directory it lands in.
+( cd "$DIST" && shasum -a 256 "$NAME.dmg" | tee "$NAME.dmg.sha256" )
